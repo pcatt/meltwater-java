@@ -1,0 +1,70 @@
+import com.fasterxml.jackson.core.*;
+import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.annotation.*;
+import java.io.*;
+
+
+class JSONParserExample {
+
+	public static void main (String [] args) {
+		
+		ParserConfig myConfig = new ParserConfig(args);
+		
+		myConfig.setJsonFilename("users_sample.json");
+		
+		myConfig.setFieldNameToSearch("city");
+		myConfig.setFieldValueToSearch("Kingwood");
+		myConfig.setFieldNameToReturn("lname");
+		
+		User user = new User();
+		
+		ObjectMapper mapper = new ObjectMapper(); 
+		try 
+		{
+			//Crete JsonFactory
+			JsonFactory jsonFactory = new JsonFactory();
+			JsonParser jp = jsonFactory.createJsonParser(new File(myConfig.getJsonFilename()));
+		  
+			jp.nextToken();
+		  
+			if (jp.nextToken() != JsonToken.START_OBJECT) 
+			{
+				throw new IOException("Expected data to start with an Object");
+			}
+			
+			User tempUser = new User();
+			
+			//while (jp.nextToken() != JsonToken.END_ARRAY)
+			//{
+				while (jp.nextToken() != JsonToken.END_OBJECT) 
+				{
+					//Get field name
+					String fieldName = jp.getCurrentName();
+					
+					//System.exit(1);
+					
+					//Get field value
+					jp.nextToken();
+					
+					//If this token field name is equal to fieldNameToSearch...
+					if (fieldName.equalsIgnoreCase(myConfig.getFieldNameToSearch())) 
+					{
+						String fieldValue = jp.getText();
+						if (fieldValue.equalsIgnoreCase(myConfig.getFieldValueToSearch())) 
+						{
+							System.out.println(fieldValue);
+						}
+					}
+					
+				}//End while
+			//}
+		} catch (Exception e) {
+			System.out.println(e);
+		}//End try
+		
+
+		//myConfig.printKeywords();
+	}
+	
+	
+}//End class

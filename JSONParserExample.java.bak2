@@ -1,0 +1,75 @@
+import com.fasterxml.jackson.core.*;
+import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.annotation.*;
+import java.io.*;
+
+
+class JSONParserExample {
+
+	public static void main (String [] args) {
+		
+		ParserConfig myConfig = new ParserConfig(args);
+		
+		myConfig.setJsonFilename("users_sample.json");
+		
+		myConfig.setFieldNameToSearch("city");
+		myConfig.setFieldValueToSearch("Kingwood");
+		myConfig.setFieldNameToReturn("lname");
+		
+		User user = new User();
+		
+		ObjectMapper mapper = new ObjectMapper();
+		
+		try 
+		{
+			//Crete JsonFactory
+			JsonFactory jsonFactory = new JsonFactory();
+			JsonParser jp = jsonFactory.createJsonParser(new File(myConfig.getJsonFilename()));
+		  
+			//Open array (JSON file containing many entries starts with '[')
+			jp.nextToken();
+		  			
+			User tempUser = new User();
+			
+			while (jp.nextToken() == JsonToken.START_OBJECT)
+			{
+				while (jp.nextToken() != JsonToken.END_OBJECT)
+				{			
+					
+					jp.nextToken();
+					//Get field name
+					String fieldName = jp.getCurrentName();
+					
+					//Get field value
+					String fieldValue = jp.getText();
+					
+					//If this token field name is equal to fieldNameToSearch...
+					if (fieldName.equalsIgnoreCase(myConfig.getFieldNameToSearch())) 
+					{
+						if (fieldValue.equalsIgnoreCase(myConfig.getFieldValueToSearch())) 
+						{
+							System.out.println(fieldName + " " + fieldValue);
+						}						
+					}					
+				}		
+						
+				//Alternatively, read as an object -
+				//but then we need to use reflection to pull out variable fieldnames
+				//user = mapper.readValue(jp, User.class);
+				//String userCity = user.getCity();
+				//System.out.println(userCity);			
+				
+			}//End while
+			
+			jp.close();
+				
+		} catch (Exception e) {
+			System.out.println(e);
+		}//End try
+		
+
+		//myConfig.printKeywords();
+	}
+	
+	
+}//End class
